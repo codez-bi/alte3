@@ -42,11 +42,10 @@ namespace alte3.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [EmailAddress]
+            [EmailAddress(ErrorMessage = "Invalid Email Address.")]
             public string Email { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Invalid Password.")]
             [DataType(DataType.Password)]
             public string Password { get; set; }
 
@@ -96,8 +95,17 @@ namespace alte3.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
+                    //ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    //return Page();
+                    var user = await _userManager.FindByNameAsync(Input.Email);
+                    if (user == null)
+                    {
+                        ModelState.AddModelError("Input.Email", "Not Application User.");
+                    }
+                    else if (!await _userManager.CheckPasswordAsync(user, Input.Password))
+                    {
+                        ModelState.AddModelError("Input.Password", "Wrong Password.");
+                    }
                 }
             }
 
